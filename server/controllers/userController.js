@@ -10,10 +10,10 @@ export const login = async (req,res) => {
         const errors = {};
     
         if (!email) {
-          errors.email = 'Email is required';
+          errors.email = 'Input an Email';
         }
         if (!password) {
-          errors.password = 'Password is required';
+          errors.password = 'Input a password';
         }
  
         if (Object.keys(errors).length > 0) {
@@ -43,6 +43,62 @@ export const login = async (req,res) => {
     }
  
 }
+
+export const register = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    const errors = {};
+
+    if (!username) {
+      errors.username = 'Username is required';
+    }
+    if (!email) {
+      errors.email = 'Email is required';
+    }
+    if (!password) {
+      errors.password = 'Password is required';
+    }
+
+    if(!validator.isEmail(email)){
+      errors.email = 'Email is not valid'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    const userExist = await User.findOne({email}) 
+
+    if(userExist){
+      return res.status(400).json({ errors: { email: "Email already exists" } })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+
+    const newUser = {
+      username,
+      email,
+      password : hashedPassword,
+      userType : 'endUser'
+    };
+
+    const user = await User.create(newUser);
+
+    // return res.status(200).json(result);
+    return res.status(200).json({
+      _id : user.id,
+      username: user.username,
+      email : user.email,
+      token : generateToken(user.id,user.userType)
+  })
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+
+};
 
 export const getUsers = async (req, res) => {
   try {
@@ -197,9 +253,9 @@ export const deleteUser = async (req,res) =>{
     }
 }
 
-const generateToken = (_id,userType) =>{
+const generateToken = (_id) =>{
 
-    return jwt.sign({_id,userType}, process.env.JWT_SECRET, {
+    return jwt.sign({_id}, process.env.JWT_SECRET, {
         expiresIn : "12h"
     })
 

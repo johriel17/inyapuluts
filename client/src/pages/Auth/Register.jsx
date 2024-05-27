@@ -4,8 +4,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -13,6 +11,9 @@ import FaceIcon from '@mui/icons-material/Face';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+import { useRegister } from '../../hooks/useRegister';
+import { useState } from 'react';
 
 function Copyright(props) {
   return (
@@ -32,13 +33,26 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function Register() {
-  const handleSubmit = (event) => {
+
+  const {register, error, isLoading, errors} = useRegister()
+  const [matchPassword, setMatchPassword] = useState(true)
+  const handleSubmit = async(event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    // console.log({
+    //   email: data.get('email'),
+    //   password: data.get('password'),
+    // });
+    setMatchPassword(true)
+    if(data.get('password') !== data.get('confirmPassword')){
+      setMatchPassword(false)
+      return
+    }
+
+    await register(data.get('username'), data.get('email'), data.get('password'))
+
+    
+
   };
 
   return (
@@ -70,6 +84,7 @@ export default function Register() {
               autoComplete="off"
               autoFocus
             />
+            {errors.username && <div className='text-red-500'>{errors.username}</div>}
             <TextField
               margin="normal"
               required
@@ -79,6 +94,7 @@ export default function Register() {
               name="email"
               autoComplete="off"
             />
+            {errors.email && <span className='text-red-500'>{errors.email}</span>}
             <TextField
               margin="normal"
               required
@@ -88,6 +104,7 @@ export default function Register() {
               type="password"
               id="password"
             />
+            {errors.password && <span className='text-red-500'>{errors.password}</span>}
             <TextField
               margin="normal"
               required
@@ -97,13 +114,14 @@ export default function Register() {
               type="password"
               id="confirmPassword"
             />
+            {matchPassword == false && <span className='text-red-500'>Password does not match</span>}
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              Register
             </Button>
             <Grid container>
               <Grid item xs>

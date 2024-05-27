@@ -1,12 +1,13 @@
 import  express  from "express"
-import { getUsers, getUser, createUser, updateUser, deleteUser, login } from "../controllers/userController.js"
-// import { protect, adminOnly } from '../middleware/authMiddleware.js'
+import { getUsers, getUser, createUser, updateUser, deleteUser, login, register } from "../controllers/userController.js"
+import { protect, adminOnly } from '../middlewares/authMiddleware.js'
 const router = express.Router()
 
 
 router.post('/login', login)
+router.post('/register', register)
 
-// router.use(protect)
+router.use(protect)
 // router.use(adminOnly)
 
 router.get('/', getUsers)

@@ -16,6 +16,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { useLogin } from '../../hooks/useLogin';
 
+
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -35,20 +36,13 @@ const defaultTheme = createTheme();
 
 export default function Login() {
 
-  const {login, errors, isLoading} = useLogin()
+  const {login, error, isLoading, errors} = useLogin()
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    
-    // console.log({
-    //   email: data.get('email'),
-    //   password: data.get('password'),
-    // });
-
     await login(data.get('email'), data.get('password'))
-
 
   };
 
@@ -91,6 +85,9 @@ export default function Login() {
               id="password"
               autoComplete="current-password"
             />
+            {errors.email && <div className='text-red-500'>{errors.email}</div>}
+            {errors.password && <div className='text-red-500'>{errors.password}</div>}
+            {error && <div className='text-red-500'>{error}</div>}
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"

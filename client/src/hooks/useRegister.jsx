@@ -2,17 +2,17 @@ import { useState } from "react";
 import { useAuthContext } from "./useAuthContext";
 import axios from 'axios';
 
-export const useLogin = () => {
+export const useRegister = () => {
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const { dispatch } = useAuthContext();
 
-    const login = async (email, password) => {
+    const register = async (username, email, password) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.post('http://localhost:4000/api/users/login', { email, password });
+            const response = await axios.post('http://localhost:4000/api/users/register', { username, email, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data))
             dispatch({ type: 'LOGIN', payload: response.data });
@@ -23,9 +23,8 @@ export const useLogin = () => {
             setError(error.response.data.error);
             setIsLoading(false);
             setErrors(error.response.data.errors)
-            // throw error;
         }
     };
 
-    return { login, isLoading, error, errors };
+    return { register, isLoading, error, errors };
 };
