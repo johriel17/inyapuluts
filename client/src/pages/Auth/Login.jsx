@@ -75,6 +75,11 @@ export default function Login() {
               autoComplete="off"
               autoFocus
             />
+            {errors.email && (
+              <Typography color="error" variant="body2" sx={{display: 'inline'}}>
+                {errors.email}
+              </Typography>
+            )}
             <TextField
               margin="normal"
               required
@@ -85,9 +90,16 @@ export default function Login() {
               id="password"
               autoComplete="current-password"
             />
-            {errors.email && <div className='text-red-500'>{errors.email}</div>}
-            {errors.password && <div className='text-red-500'>{errors.password}</div>}
-            {error && <div className='text-red-500'>{error}</div>}
+            {errors.password && (
+              <Typography color="error" variant="body2">
+                {errors.password}
+              </Typography>
+            )}
+            {error && (
+              <Typography color="error" variant="body2">
+                {error}
+              </Typography>
+            )}
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"

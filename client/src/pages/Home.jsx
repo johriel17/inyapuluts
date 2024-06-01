@@ -1,8 +1,15 @@
+import { Container, Typography, Box } from '@mui/material'
 import React from 'react'
 
 const Home = () => {
   return (
-    <div className='text-orange-500'>Hello world!</div>
+    <Container maxWidth='xl' sx={{marginX : '100px'}}>
+      <Box>
+        <Typography color='success' variant='h2'>
+          Hello World!
+        </Typography>
+      </Box>
+    </Container>
   )
 }
 

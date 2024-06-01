@@ -84,7 +84,11 @@ export default function Register() {
               autoComplete="off"
               autoFocus
             />
-            {errors.username && <div className='text-red-500'>{errors.username}</div>}
+            {errors.username && (
+              <Typography color="error" variant='body2' sx={{display: 'inline'}}>
+                {errors.username}
+              </Typography>
+            )}
             <TextField
               margin="normal"
               required
@@ -94,7 +98,11 @@ export default function Register() {
               name="email"
               autoComplete="off"
             />
-            {errors.email && <span className='text-red-500'>{errors.email}</span>}
+            {errors.email && (
+              <Typography color="error" variant='body2'>
+                {errors.email}
+              </Typography>
+            )}
             <TextField
               margin="normal"
               required
@@ -104,7 +112,11 @@ export default function Register() {
               type="password"
               id="password"
             />
-            {errors.password && <span className='text-red-500'>{errors.password}</span>}
+            {errors.password && (
+              <Typography color="error" variant='body2'>
+                {errors.password}
+              </Typography>
+            )}
             <TextField
               margin="normal"
               required
@@ -114,7 +126,11 @@ export default function Register() {
               type="password"
               id="confirmPassword"
             />
-            {matchPassword == false && <span className='text-red-500'>Password does not match</span>}
+            {matchPassword == false && (
+              <Typography color="error" variant='body2'>
+                Password does not match
+              </Typography>
+            )}
             <Button
               type="submit"
               fullWidth
