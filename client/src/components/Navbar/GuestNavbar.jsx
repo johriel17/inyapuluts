@@ -40,7 +40,7 @@ function GuestNavbar() {
 
   return (
     <AppBar position="static">
-      <Container maxWidth="xl" sx={{paddingX: '100px'}}>
+      <Container maxWidth="xl" sx={{paddingX: {md: '100px'}}}>
         <Toolbar disableGutters>
           <TapasIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Typography
@@ -135,7 +135,7 @@ function GuestNavbar() {
                 to={`/${setting}`}
                 key={setting}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: 'white', display: 'block', boxShadow: 5, }}
               >
                 {setting}
               </Button>

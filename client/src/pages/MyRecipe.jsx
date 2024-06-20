@@ -6,17 +6,20 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import React, { useEffect, useState } from 'react'
 import ApiClient from '../components/Api';
+
 //components
 import RecipeDetails from '../components/Recipe/RecipeDetails';
-
+import RecipeForm from '../components/Recipe/RecipeForm';
+import NoRecipe from '../components/Recipe/NoRecipe';
 
 //context hooks
 import { useRecipeContext } from '../hooks/Recipe/useRecipeContext';
-const Home = () => {
+import { useAuthContext } from '../hooks/useAuthContext';
+const MyRecipe = () => {
 
   const {recipes, dispatch} = useRecipeContext()
+  const { user } = useAuthContext()
   const [isLoading, setIsLoading] = useState(false)
-
   const api = ApiClient()
   useEffect(() => {
 
@@ -24,7 +27,7 @@ const Home = () => {
 
       try{
         setIsLoading(true)
-        const res = await api.get('/recipes')
+        const res = await api.get(`/recipes/my-recipes/${user._id}`)
         dispatch({type : 'SET_RECIPES', payload : res.data})
         setIsLoading(false)
       }catch(error){
@@ -42,27 +45,34 @@ const Home = () => {
   return (
     isLoading ? (
       <Box> </Box>
-    ) : (
-      <Container maxWidth='xl'>
-        <Box sx={{paddingX: {xs: '15px', md: '75px'}, marginY : '5px'}}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
+    ) :
+    (
+    <Container maxWidth='xl'>
+      <Box sx={{paddingX: {xs: '15px', md: '75px'}, marginY : '5px'}}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={8}>
 
-            {recipes && recipes.map((recipe)=>(
-              <RecipeDetails key={recipe._id} recipe={recipe} page='home' saved={recipe.Saved} liked={recipe.Liked} likes={recipe.likes}  />
-            ))}
+          {recipes && recipes.map((recipe)=>(
+            <RecipeDetails key={recipe._id} recipe={recipe} page='myRecipe' saved={false}/>
+          ))}
 
-          </Grid>
-          <Grid item xs={12} md={4}>
+          {recipes && recipes.length === 0  && (
+            <NoRecipe/>
+          )}
 
-            <Box sx={{height : '500px', backgroundColor: 'blue'}}></Box>
-            
-          </Grid>
         </Grid>
-        </Box>
-      </Container>
+        <Grid item xs={12} md={4}>
+
+
+            <RecipeForm />
+
+          
+        </Grid>
+      </Grid>
+      </Box>
+    </Container>
     )
   )
 }
 
-export default Home
+export default MyRecipe

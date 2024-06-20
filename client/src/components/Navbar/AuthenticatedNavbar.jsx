@@ -12,17 +12,21 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TapasIcon from '@mui/icons-material/Tapas';
+import { Link as RouterLink } from 'react-router-dom';
 import useLogout from '../../hooks/useLogout';
 
-const pages = ['Home', 'Saved Recipes', 'My Recipes'];
+const pages = [
+  { name: 'Home', path: '/' },
+  { name: 'Saved Recipes', path: '/saved-recipes' },
+  { name: 'My Recipes', path: '/my-recipes' }
+];
 const settings = ['Profile', 'Logout'];
-
 
 function AuthenticatedNavbar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const { logout } = useLogout()
+  const { logout } = useLogout();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -40,21 +44,19 @@ function AuthenticatedNavbar() {
   };
 
   const handleLogout = () => {
-
-    logout()
-
-  }
+    logout();
+  };
 
   return (
     <AppBar position="static">
-      <Container maxWidth="xl" sx={{paddingX : {md : '100px'}}}>
+      <Container maxWidth="xl" sx={{ paddingX: { md: '100px' } }}>
         <Toolbar disableGutters>
           <TapasIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="/"
+            component={RouterLink}
+            to="/"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -98,8 +100,13 @@ function AuthenticatedNavbar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+                <MenuItem
+                  key={page.name}
+                  component={RouterLink}
+                  to={page.path}
+                  onClick={handleCloseNavMenu}
+                >
+                  <Typography textAlign="center">{page.name}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -108,8 +115,8 @@ function AuthenticatedNavbar() {
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+            component={RouterLink}
+            to="/"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -126,11 +133,13 @@ function AuthenticatedNavbar() {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
-                key={page}
+                key={page.name}
+                component={RouterLink}
+                to={page.path}
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                {page}
+                {page.name}
               </Button>
             ))}
           </Box>
@@ -159,18 +168,13 @@ function AuthenticatedNavbar() {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    {setting === 'Logout' ? (
-                        <Typography textAlign="center" onClick={handleLogout}>
-                            {setting}
-                        </Typography>
-                    ) :
-                    (
-                        <Typography textAlign="center">
-                            {setting}
-                        </Typography>
-                    )
-                    }
-                    
+                  {setting === 'Logout' ? (
+                    <Typography textAlign="center" onClick={handleLogout}>
+                      {setting}
+                    </Typography>
+                  ) : (
+                    <Typography textAlign="center">{setting}</Typography>
+                  )}
                 </MenuItem>
               ))}
             </Menu>

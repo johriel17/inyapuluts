@@ -65,6 +65,9 @@ export default function Register() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            boxShadow: 3,
+            padding: 3,
+            borderRadius: 2
           }}
         >
           <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
