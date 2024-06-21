@@ -1,9 +1,10 @@
 
 import axios from 'axios';
 // import { useLogout } from '../hooks/useLogout';
+import useLogout from '../hooks/useLogout'
 
 const ApiClient = () => {
-//   const { logout } = useLogout();
+  const { logout } = useLogout();
 
   // Create Axios instance
   const api = axios.create({
@@ -25,15 +26,16 @@ const ApiClient = () => {
   );
 
   // Add response interceptor
-//   api.interceptors.response.use(
-//     (response) => response,
-//     (error) => {
-//       if (error.response && error.response.data.error === 'Token Expired') {
-//         logout(); 
-//       }
-//       return Promise.reject(error);
-//     }
-//   );
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response && error.response.data.error === 'Token Expired') {
+        logout();
+         
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return api;
 };
