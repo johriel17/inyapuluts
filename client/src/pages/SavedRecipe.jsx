@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import ApiClient from '../components/Api';
 //components
 import RecipeDetails from '../components/Recipe/RecipeDetails';
+import RecipeDetailsSkeleton from '../components/Recipe/RecipeDetailsSkeleton';
 import NoRecipe from '../components/Recipe/NoRecipe';
 import TopRecipe from '../components/Recipe/TopRecipe';
 
@@ -40,20 +41,33 @@ const SavedRecipe = () => {
 
   
   return (
-    isLoading ? (
-      <Box> </Box>
-    ): (
     <Container maxWidth='xl'>
       <Box sx={{paddingX: {xs: '15px', md: '75px'}, marginY : '5px'}}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
 
-          {recipes && recipes.map((recipe)=>(
+          {/* {recipes && recipes.map((recipe)=>(
             <RecipeDetails key={recipe._id} recipe={recipe} page='savedRecipe'  />
           ))}
 
           {recipes && recipes.length === 0  && (
             <NoRecipe/>
+          )} */}
+
+          {isLoading ? (
+            <RecipeDetailsSkeleton />
+          ) : (
+            recipes && recipes.length > 0 ? (
+              recipes.map((recipe) => (
+                <RecipeDetails
+                  key={recipe._id}
+                  recipe={recipe}
+                  page='savedRecipe'
+                />
+              ))
+            ) : (
+              <NoRecipe />
+            )
           )}
 
         </Grid>
@@ -66,7 +80,6 @@ const SavedRecipe = () => {
       </Grid>
       </Box>
     </Container>
-    )
   )
 }
 

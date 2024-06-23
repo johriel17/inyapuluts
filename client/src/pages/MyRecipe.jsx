@@ -9,6 +9,7 @@ import ApiClient from '../components/Api';
 
 //components
 import RecipeDetails from '../components/Recipe/RecipeDetails';
+import RecipeDetailsSkeleton from '../components/Recipe/RecipeDetailsSkeleton';
 import RecipeForm from '../components/Recipe/RecipeForm';
 import NoRecipe from '../components/Recipe/NoRecipe';
 
@@ -43,21 +44,36 @@ const MyRecipe = () => {
 
   
   return (
-    isLoading ? (
-      <Box> </Box>
-    ) :
-    (
     <Container maxWidth='xl'>
       <Box sx={{paddingX: {xs: '15px', md: '75px'}, marginY : '5px'}}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
 
-          {recipes && recipes.map((recipe)=>(
+          {/* {recipes && recipes.map((recipe)=>(
             <RecipeDetails key={recipe._id} recipe={recipe} page='myRecipe' saved={false}/>
           ))}
 
           {recipes && recipes.length === 0  && (
             <NoRecipe/>
+          )} */}
+
+          {isLoading ? (
+            <RecipeDetailsSkeleton />
+          ) : (
+            recipes && recipes.length > 0 ? (
+              recipes.map((recipe) => (
+                <RecipeDetails
+                  key={recipe._id}
+                  recipe={recipe}
+                  page='myRecipe'
+                  saved={recipe.Saved}
+                  liked={recipe.Liked}
+                  likes={recipe.likes}
+                />
+              ))
+            ) : (
+              <NoRecipe />
+            )
           )}
 
         </Grid>
@@ -71,7 +87,6 @@ const MyRecipe = () => {
       </Grid>
       </Box>
     </Container>
-    )
   )
 }
 
