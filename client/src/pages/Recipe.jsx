@@ -15,6 +15,7 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import StarIcon from '@mui/icons-material/Star';
 import { red } from '@mui/material/colors';
 
 import ApiClient from '../components/Api';
@@ -105,16 +106,22 @@ const Recipe = () => {
                 {recipe && recipe.name}
             </Typography>
             <Typography variant="subtitle1" color="text.primary">
+                Best with:
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{marginBottom: 1}}>
+              <StarIcon sx={{ fontSize: 'small', marginRight: 1 }} />{recipe && recipe.liquor && recipe.liquor.name}
+            </Typography>
+            <Typography variant="subtitle1" color="text.primary">
                 Description:
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{marginBottom: 1}}>
-                {recipe && recipe.description}
+              <FiberManualRecord sx={{ fontSize: 'small', marginRight: 1 }} />{recipe && recipe.description}
             </Typography>
             <Typography variant="subtitle1" color="text.primary">
                 Instructions:
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{marginBottom: 1}}>
-                {recipe && recipe.instructions}
+              <FiberManualRecord sx={{ fontSize: 'small', marginRight: 1 }} />{recipe && recipe.instructions}
             </Typography>
             <Typography variant="subtitle1" color="text.primary">
                 Ingredients:

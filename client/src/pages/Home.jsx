@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import ApiClient from '../components/Api';
 //components
 import RecipeDetails from '../components/Recipe/RecipeDetails';
+import TopRecipe from '../components/Recipe/TopRecipe';
 
 
 //context hooks
@@ -55,7 +56,8 @@ const Home = () => {
           </Grid>
           <Grid item xs={12} md={4}>
 
-            <Box sx={{height : '500px', backgroundColor: 'blue'}}></Box>
+            {/* <Box sx={{height : '500px', backgroundColor: 'blue'}}></Box> */}
+            <TopRecipe />
             
           </Grid>
         </Grid>

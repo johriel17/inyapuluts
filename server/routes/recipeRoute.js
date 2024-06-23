@@ -1,5 +1,5 @@
 import  express  from "express"
-import { getRecipes, getRecipe, createRecipe, getMyRecipes, saveRecipe, getSavedRecipes, likeRecipe } from "../controllers/recipeController.js"
+import { getRecipes, getRecipe, createRecipe, getMyRecipes, saveRecipe, getSavedRecipes, likeRecipe, getTopRecipes } from "../controllers/recipeController.js"
 import { protect, adminOnly } from '../middlewares/authMiddleware.js'
 const router = express.Router()
 
@@ -16,6 +16,8 @@ router.get('/like-recipe/:recipeId', likeRecipe)
 router.get('/save-recipe/:recipeId', saveRecipe)
 
 router.get('/saved-recipes', getSavedRecipes)
+
+router.get('/top-recipes/:filter', getTopRecipes)
 
 router.get('/:id', getRecipe)
 

@@ -88,7 +88,7 @@ export const getRecipe = async (req,res) => {
     try{
         const { id } = req.params
 
-        const recipe = await Recipe.findById(id).exec();
+        const recipe = await Recipe.findById(id).populate('liquor').exec();
         const ingredients = await RecipeIngredient.find({ recipe: id }).populate('ingredient').exec();
 
         return res.status(200).json({recipe, ingredients})
@@ -226,3 +226,77 @@ export const createRecipe = async (req, res) => {
     }
 
   }
+
+  export const getTopRecipes = async (req, res) => {
+    try {
+      // Aggregate the most liked recipes
+
+      const { filter } = req.params
+
+      if(filter === 'most-liked'){
+        var Model = LikedRecipe;
+      }else if(filter === 'most-saved'){
+        var Model = SavedRecipe
+      }
+      
+
+      const topRecipes = await Model.aggregate([
+        {
+          $group: {
+            _id: '$recipe',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $limit: 5,
+        },
+        {
+          $lookup: {
+            from: 'recipes',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'recipeDetails',
+          },
+        },
+        {
+          $unwind: '$recipeDetails',
+        },
+        {
+          $lookup: {
+            from: 'liquors', // Name of the referenced collection
+            localField: 'recipeDetails.liquor', // Field in 'Recipe' collection referencing 'Liquor'
+            foreignField: '_id',
+            as: 'liquorDetails',
+          },
+        },
+        {
+          $unwind: '$liquorDetails',
+        },
+        {
+          $project: {
+            _id: 0,
+            recipeId: '$_id',
+            count: 1,
+            recipeDetails: {
+              _id: 1,
+              name: 1,
+              // Include other fields from 'Recipe' collection as needed
+            },
+            liquorDetails: {
+              _id: '$liquorDetails._id',
+              name: '$liquorDetails.name',
+              // Include other fields from 'Liquor' collection as needed
+            },
+          },
+        },
+      ]);
+  
+      res.status(200).json(topRecipes);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Something went wrong' });
+    }
+  };

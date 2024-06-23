@@ -9,6 +9,7 @@ import ApiClient from '../components/Api';
 //components
 import RecipeDetails from '../components/Recipe/RecipeDetails';
 import NoRecipe from '../components/Recipe/NoRecipe';
+import TopRecipe from '../components/Recipe/TopRecipe';
 
 //context hooks
 import { useRecipeContext } from '../hooks/Recipe/useRecipeContext';
@@ -58,7 +59,8 @@ const SavedRecipe = () => {
         </Grid>
         <Grid item xs={12} md={4}>
 
-          <Box sx={{height : '500px', backgroundColor: 'blue'}}></Box>
+          {/* <Box sx={{height : '500px', backgroundColor: 'blue'}}></Box> */}
+          <TopRecipe />
           
         </Grid>
       </Grid>
