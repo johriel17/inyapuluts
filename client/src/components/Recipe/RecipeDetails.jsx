@@ -25,6 +25,9 @@ import { Box } from '@mui/material';
 //axios
 import ApiClient from '../Api';
 
+//context
+import { useAuthContext } from '../../hooks/useAuthContext';
+
 export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
   const api = ApiClient()
   const [isSaved, setIsSaved] = useState(saved)
@@ -32,7 +35,8 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
 
   const [likesCount, setLikesCount] = useState(likes)
 
-  let user = recipe.user.username
+  const { user } = useAuthContext()
+
 
 
   const handleLikeRecipe = async() => {
@@ -74,7 +78,7 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-              {user.toUpperCase().charAt(0)}
+              {recipe.user.username.toUpperCase().charAt(0)}
             </Avatar>
           }
           action={
@@ -82,7 +86,7 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
               <MoreVertIcon />
             </IconButton>
           }
-          title={user}
+          title={recipe.user.username}
           subheader={formatDistanceToNow(new Date(recipe.createdAt), {addSuffix: true})}
         />
         <Box display="flex" justifyContent="center">
@@ -103,6 +107,9 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
           <Typography variant="h5" color="text.primary">
             {recipe.name}
           </Typography>
+          <Typography variant="subtitle1" sx={{fontStyle: 'italic'}} color="text.primary">
+            Best with {recipe.liquor.name}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {recipe.description}
           </Typography>
@@ -115,7 +122,7 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
           <IconButton color='primary' component={RouterLink} to={`/recipe/${recipe._id}`}>
             <VisibilityIcon />
           </IconButton>
-          {page === 'home' &&(
+          {page === 'home' && user._id != recipe.user._id && (
           <IconButton color={isSaved? 'primary' : 'default'} aria-label="save recipe" onClick={handleSaveRecipe}>
             <TurnedInIcon />
           </IconButton>

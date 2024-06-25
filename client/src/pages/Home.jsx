@@ -11,6 +11,7 @@ import RecipeDetails from '../components/Recipe/RecipeDetails';
 import TopRecipe from '../components/Recipe/TopRecipe';
 import RecipeDetailsSkeleton from '../components/Recipe/RecipeDetailsSkeleton';
 import NoRecipe from '../components/Recipe/NoRecipe'
+import CustomPagination from '../components/CustomPagination';
 
 //context hooks
 import { useRecipeContext } from '../hooks/Recipe/useRecipeContext';
@@ -18,28 +19,36 @@ const Home = () => {
 
   const {recipes, dispatch} = useRecipeContext()
   const [isLoading, setIsLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const api = ApiClient()
-  useEffect(() => {
 
-    const fetchRecipes = async () => {
+  const fetchRecipes = async (page) => {
 
-      try{
-        setIsLoading(true)
-        const res = await api.get('/recipes')
-        dispatch({type : 'SET_RECIPES', payload : res.data})
-        setIsLoading(false)
-      }catch(error){
-        console.log(error)
-        setIsLoading(false)
-      }
-
+    try{
+      setIsLoading(true)
+      const res = await api.get(`/recipes?page=${page}&limit=5`)
+      dispatch({type : 'SET_RECIPES', payload : res.data.recipes})
+      setTotalPages(res.data.totalPages);
+      setIsLoading(false)
+    }catch(error){
+      console.log(error)
+      setIsLoading(false)
     }
 
-    fetchRecipes()
+  }
 
-  }, [])
+  useEffect(() => {
 
+    fetchRecipes(currentPage)
+
+  }, [currentPage])
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+  
   
   return (
       <Container maxWidth='xl'>
@@ -68,6 +77,14 @@ const Home = () => {
               ) : (
                 <NoRecipe />
               )
+            )}
+
+            {!isLoading && recipes && recipes.length > 0 && (
+              <CustomPagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                handlePageChange={handlePageChange} 
+              />
             )}
             
 

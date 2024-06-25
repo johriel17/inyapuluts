@@ -11,6 +11,7 @@ import RecipeDetails from '../components/Recipe/RecipeDetails';
 import RecipeDetailsSkeleton from '../components/Recipe/RecipeDetailsSkeleton';
 import NoRecipe from '../components/Recipe/NoRecipe';
 import TopRecipe from '../components/Recipe/TopRecipe';
+import CustomPagination from '../components/CustomPagination';
 
 //context hooks
 import { useRecipeContext } from '../hooks/Recipe/useRecipeContext';
@@ -18,27 +19,34 @@ const SavedRecipe = () => {
 
   const {recipes, dispatch} = useRecipeContext()
   const [isLoading, setIsLoading] =useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const api = ApiClient()
-  useEffect(() => {
 
-    const fetchSavedRecipes = async () => {
+  const fetchSavedRecipes = async (page) => {
 
-      try{
-        setIsLoading(true)
-        const res = await api.get('/recipes/saved-recipes')
-        dispatch({type : 'SET_RECIPES', payload : res.data})
-        setIsLoading(false)
-      }catch(error){
-        console.log(error)
-      }
-
+    try{
+      setIsLoading(true)
+      const res = await api.get(`/recipes/saved-recipes?page=${page}&limit=5`)
+      dispatch({type : 'SET_RECIPES', payload : res.data.recipes})
+      setIsLoading(false)
+      setTotalPages(res.data.totalPages)
+    }catch(error){
+      console.log(error)
     }
 
-    fetchSavedRecipes()
+  }
 
-  }, [])
+  useEffect(() => {
 
+    fetchSavedRecipes(currentPage)
+
+  }, [currentPage])
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
   
   return (
     <Container maxWidth='xl'>
@@ -63,11 +71,21 @@ const SavedRecipe = () => {
                   key={recipe._id}
                   recipe={recipe}
                   page='savedRecipe'
+                  liked={recipe.Liked}
+                  likes={recipe.likes}
                 />
               ))
             ) : (
               <NoRecipe />
             )
+          )}
+
+          {!isLoading && recipes && recipes.length > 0 && (
+              <CustomPagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                handlePageChange={handlePageChange} 
+              />
           )}
 
         </Grid>

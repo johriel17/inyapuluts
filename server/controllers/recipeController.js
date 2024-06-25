@@ -7,53 +7,102 @@ import LikedRecipe from '../models/likedRecipeModel.js';
 import User from '../models/userModel.js'
 
 export const getRecipes = async (req, res) => {
-    try {
+  try {
+    const user = req.user;
 
-      const user = req.user
+    // Get pagination parameters from query string, defaulting to page 1 and 10 items per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
 
-    // Fetch all recipes and populate the user field
+    // Fetch total count of recipes for pagination
+    const totalRecipes = await Recipe.countDocuments({});
+
+    // Fetch recipes for the current page
     const recipes = await Recipe.find({})
-    .populate('user')
-    .sort({createdAt : -1})
+      .populate('user')
+      .populate('liquor')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    // Fetch saved recipes for the user and populate the recipe field
+    // Fetch saved and liked recipes for the user
     const savedRecipes = await SavedRecipe.find({ user: user._id }).populate('recipe');
     const likedRecipes = await LikedRecipe.find({ user: user._id }).populate('recipe');
 
-    // Create a set of saved recipe IDs for easy lookup
+    // Create a set of saved and liked recipe IDs for easy lookup
     const savedRecipeIds = new Set(savedRecipes.map(savedRecipe => savedRecipe.recipe._id.toString()));
     const likedRecipeIds = new Set(likedRecipes.map(likedRecipe => likedRecipe.recipe._id.toString()));
 
-    // Combine data and add the 'Saved' boolean property
+    // Combine data and add the 'Saved' and 'Liked' boolean properties
     const combinedRecipes = await Promise.all(recipes.map(async (recipe) => {
       const plainRecipe = recipe.toObject();
-  
+
       // Query number of likes for this recipe
       const likesCount = await LikedRecipe.countDocuments({ recipe: recipe._id });
-  
+
       return {
-          ...plainRecipe,
-          likes: likesCount,
-          Saved: savedRecipeIds.has(recipe._id.toString()),
-          Liked: likedRecipeIds.has(recipe._id.toString())
+        ...plainRecipe,
+        likes: likesCount,
+        Saved: savedRecipeIds.has(recipe._id.toString()),
+        Liked: likedRecipeIds.has(recipe._id.toString())
       };
     }));
 
-    return res.status(200).json(combinedRecipes);
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ error: error.message });
-    }
+    // Return paginated data along with total count
+    return res.status(200).json({
+      totalRecipes,
+      currentPage: page,
+      totalPages: Math.ceil(totalRecipes / limit),
+      recipes: combinedRecipes
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: error.message });
+  }
 };
+
 
 export const getMyRecipes = async (req, res) => {
   try {
 
-    const {user} = req.params
+    // const {user} = req.params
+    const user = req.user
 
-    const recipes = await Recipe.find({user: user}).populate('user')
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 5
+    const skip = (page - 1) * limit
+
+    const totalRecipes = await Recipe.countDocuments({ user })
+
+    const myRecipes = await Recipe.find({user: user})
+    .populate('user')
+    .sort({ createdAt : -1})
+    .skip(skip)
+    .limit(limit)
+
+    const likedRecipes = await LikedRecipe.find({ user }).populate('recipe')
+
+    const likedRecipeIds = new Set(likedRecipes.map(likedRecipe => likedRecipe.recipe._id.toString()))
+
+    const recipes = await Promise.all(myRecipes.map(async (myRecipe) => {
+      const recipe = myRecipe.toObject()
+
+      const likesCount = await LikedRecipe.countDocuments({ recipe : myRecipe._id})
+
+      return {
+        ...recipe,
+        likes: likesCount,
+        Liked: likedRecipeIds.has(myRecipe._id.toString())
+      }
+    }))
   
-    return res.status(200).json(recipes);
+    return res.status(200).json({
+      totalRecipes,
+      currentPage : page,
+      totalPages : Math.ceil(totalRecipes / limit),
+      recipes
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: error.message });
@@ -66,17 +115,52 @@ export const getSavedRecipes = async (req, res) => {
 
     const user = req.user
 
-    const savedRecipes = await SavedRecipe.find({ user: user._id }).populate('recipe').sort({ createdAt: -1 });
+    // const savedRecipes = await SavedRecipe.find({ user: user._id }).populate('recipe').sort({ createdAt: -1 });
+
+    // const recipes = await Promise.all(savedRecipes.map(async (savedRecipe) => {
+    //   const recipe = savedRecipe.recipe.toObject();
+    //   recipe.Saved = true;
+    //   recipe.user = await User.findOne({ _id: recipe.user });
+    //   return recipe;
+    // }));
+
+    const totalSavedRecipes = await SavedRecipe.countDocuments({ user: user._id });
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const savedRecipes = await SavedRecipe.find({ user: user._id })
+    .populate('recipe')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+
+    const likedRecipes = await LikedRecipe.find({ user: user._id }).populate('recipe');
+    
+    const likedRecipeIds = new Set(likedRecipes.map(likedRecipe => likedRecipe.recipe._id.toString()));
 
     const recipes = await Promise.all(savedRecipes.map(async (savedRecipe) => {
       const recipe = savedRecipe.recipe.toObject();
-      recipe.Saved = true;
-      recipe.user = await User.findOne({ _id: recipe.user });
-      return recipe;
+
+      const likesCount = await LikedRecipe.countDocuments({ recipe: recipe._id });
+
+      return {
+        ...recipe,
+        likes: likesCount,
+        Saved: true,
+        Liked: likedRecipeIds.has(recipe._id.toString()),
+        user: await User.findOne({ _id: recipe.user })
+      };
     }));
 
   
-    return res.status(200).json(recipes);
+    return res.status(200).json({
+      totalSavedRecipes,
+      currentPage : page,
+      totalPages : Math.ceil(totalSavedRecipes / limit),
+      recipes
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: error.message });
@@ -88,10 +172,25 @@ export const getRecipe = async (req,res) => {
     try{
         const { id } = req.params
 
-        const recipe = await Recipe.findById(id).populate('liquor').exec();
+        const user = req.user
+
+        const recipe = await Recipe.findById(id).populate('liquor').populate('user').exec();
         const ingredients = await RecipeIngredient.find({ recipe: id }).populate('ingredient').exec();
 
-        return res.status(200).json({recipe, ingredients})
+        const likesCount = await LikedRecipe.countDocuments({ recipe: id });
+
+        const likedByUser = await LikedRecipe.exists({ recipe: id, user});
+        const savedByUser = await SavedRecipe.exists({ recipe: id, user})
+
+        return res.status(200).json({
+          recipe : {
+            ...recipe.toObject(),
+            likes : likesCount,
+            Liked : !!likedByUser,
+            Saved : !!savedByUser
+          },
+          ingredients
+        })
 
     }catch(error){
         console.log(error.message)
@@ -187,15 +286,23 @@ export const createRecipe = async (req, res) => {
 
       const { recipeId } = req.params
       const user = req.user
-      
-      const savedRecipe = new SavedRecipe({
-        recipe : recipeId,
-        user : user._id
-      })
-  
-      savedRecipe.save()
 
-      return res.status(200).json({message : 'Recipe successfully saved'})
+      const exists = await SavedRecipe.exists({ recipe: recipeId, user})
+
+      if(exists){
+        return res.status(200).json({ message: 'Failed! Recipe already saved'})
+        
+      }else{
+
+        const savedRecipe = new SavedRecipe({
+          recipe : recipeId,
+          user : user._id
+        })
+    
+        savedRecipe.save()
+        return res.status(200).json({message : 'Recipe successfully saved'})
+
+      }
 
     }catch(error){
       console.log(error)
@@ -210,16 +317,26 @@ export const createRecipe = async (req, res) => {
 
       const { recipeId } = req.params
       const user = req.user
+
+      const exists = await LikedRecipe.exists({ recipe: recipeId, user})
       
-      const likedRecipe = new LikedRecipe({
-        recipe : recipeId,
-        user : user._id
-      })
+      if(exists) {
+
+        return res.status(200).json({ message: 'Failed! Recipe already liked'})
+
+      }else{
+
+        const likedRecipe = new LikedRecipe({
+          recipe : recipeId,
+          user : user._id
+        })
+    
+        likedRecipe.save()
   
-      likedRecipe.save()
+        return res.status(200).json({message : 'Recipe successfully liked'})
 
-      return res.status(200).json({message : 'Recipe successfully liked'})
-
+      }
+      
     }catch(error){
       console.log(error)
       res.status(500).json({ error: 'Server error'})

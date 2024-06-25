@@ -9,7 +9,7 @@ router.use(protect)
 
 router.get('/', getRecipes)
 
-router.get('/my-recipes/:user', getMyRecipes)
+router.get('/my-recipes', getMyRecipes)
 
 router.get('/like-recipe/:recipeId', likeRecipe)
 
