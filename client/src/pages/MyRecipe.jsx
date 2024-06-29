@@ -50,6 +50,10 @@ const MyRecipe = () => {
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
+
+  const handleDeleteRecipe = (recipe) => {
+    dispatch({ type: 'DELETE_RECIPE', payload: recipe });
+  };
   
   return (
     <Container maxWidth='xl'>
@@ -76,6 +80,7 @@ const MyRecipe = () => {
                   page='myRecipe'
                   liked={recipe.Liked}
                   likes={recipe.likes}
+                  onDelete={handleDeleteRecipe}
                 />
               ))
             ) : (

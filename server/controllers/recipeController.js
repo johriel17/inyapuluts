@@ -77,6 +77,7 @@ export const getMyRecipes = async (req, res) => {
 
     const myRecipes = await Recipe.find({user: user})
     .populate('user')
+    .populate('liquor')
     .sort({ createdAt : -1})
     .skip(skip)
     .limit(limit)
@@ -115,15 +116,6 @@ export const getSavedRecipes = async (req, res) => {
 
     const user = req.user
 
-    // const savedRecipes = await SavedRecipe.find({ user: user._id }).populate('recipe').sort({ createdAt: -1 });
-
-    // const recipes = await Promise.all(savedRecipes.map(async (savedRecipe) => {
-    //   const recipe = savedRecipe.recipe.toObject();
-    //   recipe.Saved = true;
-    //   recipe.user = await User.findOne({ _id: recipe.user });
-    //   return recipe;
-    // }));
-
     const totalSavedRecipes = await SavedRecipe.countDocuments({ user: user._id });
 
     const page = parseInt(req.query.page) || 1;
@@ -131,7 +123,13 @@ export const getSavedRecipes = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const savedRecipes = await SavedRecipe.find({ user: user._id })
-    .populate('recipe')
+    .populate({
+      path: 'recipe',
+      populate: [
+        { path: 'liquor' },
+        { path: 'user' }
+      ]
+    })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
@@ -417,3 +415,39 @@ export const createRecipe = async (req, res) => {
       res.status(500).json({ message: 'Something went wrong' });
     }
   };
+
+export const deleteRecipe = async (req,res) => {
+
+  try{
+    const { user } = req.user
+    const { recipeId } = req.params
+    
+    const recipe = await Recipe.findOneAndDelete({_id : recipeId})
+
+    if(recipe){
+
+
+      await Promise.all([
+        RecipeIngredient.deleteMany({ recipe: recipeId }),
+        LikedRecipe.deleteMany({ recipe: recipeId }),
+        SavedRecipe.deleteMany({ recipe: recipeId })
+      ]);
+
+      const data = {
+        msg : 'successfully deleted',
+        recipe
+      }
+
+      return res.status(200).json(data)
+
+    }else{
+      return res.status(404).json({msg : 'recipe not found'})
+    }
+
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+
+
+}

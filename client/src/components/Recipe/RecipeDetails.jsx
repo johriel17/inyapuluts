@@ -16,6 +16,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TurnedInIcon from '@mui/icons-material/TurnedIn';
+import Menu from '@mui/material/Menu';
+// import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Router, Link as RouterLink} from 'react-router-dom'
 
 //date-fns
@@ -28,7 +36,7 @@ import ApiClient from '../Api';
 //context
 import { useAuthContext } from '../../hooks/useAuthContext';
 
-export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
+export default function RecipeDetails({ recipe, page, saved, liked, likes, onDelete }) {
   const api = ApiClient()
   const [isSaved, setIsSaved] = useState(saved)
   const [isLiked, setIsLiked] = useState(liked)
@@ -72,6 +80,25 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
 
   }
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleDelete = async() => {
+
+    try{
+      const res = await api.delete(`recipes/${recipe._id}`)
+      onDelete(recipe)
+    }catch(error){
+      console.log(error)
+    }
+    setAnchorEl(null);
+  };
+
   return (
     <Box display='flex' alignItems='center' p={2}>
       <Card sx={{ marginX: '20px', boxShadow: 5, width: '100%'}}>
@@ -81,10 +108,34 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes }) {
               {recipe.user.username.toUpperCase().charAt(0)}
             </Avatar>
           }
-          action={
-            <IconButton aria-label="settings">
+          action={page === 'myRecipe' &&
+            <>
+            <IconButton aria-label="settings" onClick={handleActions}>
               <MoreVertIcon />
             </IconButton>
+                  <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                  }}
+                >
+                  <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                      <EditIcon color='warning' fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleDelete}>
+                    <ListItemIcon>
+                      <DeleteIcon color='error' fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Delete</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </>
           }
           title={recipe.user.username}
           subheader={formatDistanceToNow(new Date(recipe.createdAt), {addSuffix: true})}
