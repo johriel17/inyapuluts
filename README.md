@@ -4,5 +4,5 @@
 ## [Live here](https://inyapuluts.onrender.com)
 
 ## sample user
- - le0@gmail.com
+ - leo@gmail.com
  - leirhoj
