@@ -91,10 +91,18 @@ export const getMyRecipes = async (req, res) => {
 
       const likesCount = await LikedRecipe.countDocuments({ recipe : myRecipe._id})
 
+      const ingredientsData = await RecipeIngredient.find({ recipe : myRecipe._id}).populate('ingredient')
+      const ingredients = ingredientsData.map(ingredient => ({
+        name : ingredient.ingredient.name,
+        quantity : ingredient.quantity,
+        unit : ingredient.unit
+      }))
+
       return {
         ...recipe,
         likes: likesCount,
-        Liked: likedRecipeIds.has(myRecipe._id.toString())
+        Liked: likedRecipeIds.has(myRecipe._id.toString()),
+        ingredients
       }
     }))
   
@@ -268,7 +276,23 @@ export const createRecipe = async (req, res) => {
   
       await RecipeIngredient.insertMany(recipeIngredients);
 
-      const response = await Recipe.findById(recipe._id).populate('user');
+      const addedRecipe = await Recipe.findById(recipe._id)
+      .populate('user')
+      .populate('liquor')
+
+      if (addedRecipe) {
+
+        const ingredients = await RecipeIngredient.find({ recipe: addedRecipe._id }).populate('ingredient');
+      
+        var response = {
+          ...addedRecipe.toObject(),
+          ingredients: ingredients.map(({ ingredient, quantity, unit }) => ({
+            name: ingredient.name,
+            quantity,
+            unit,
+          })),
+        };
+      }
 
       return res.status(201).json( response );
       
@@ -277,6 +301,126 @@ export const createRecipe = async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   };
+
+export const editRecipe = async (req, res) => {
+    try {
+      const { recipeId } = req.params
+      const { name, description, instructions, user, liquor, ingredients } = req.body;
+      const errors = {};
+  
+      if (!name) {
+        errors.name = 'Name is required';
+      }
+      if (!description) {
+        errors.description = 'Description is required';
+      }
+      if (!instructions) {
+        errors.instructions = 'Instructions are required';
+      }
+      if (!liquor) {
+        errors.liquor = 'Liquor is required';
+      }
+      if (!user) {
+        errors.user = 'User is required';
+      }
+  
+      if (Object.keys(errors).length > 0) {
+        return res.status(400).json({ errors });
+      }
+  
+      const liquorData = await Liquor.findOne({ name: liquor }).select('_id');
+  
+      let liquorId;
+      if (!liquorData) {
+        const newLiquor = new Liquor({ name: liquor });
+        await newLiquor.save();
+        liquorId = newLiquor._id;
+      } else {
+        liquorId = liquorData._id;
+      }
+  
+      const updatedRecipe = await Recipe.findByIdAndUpdate(
+        recipeId,
+        {
+          name,
+          description,
+          instructions,
+          liquor: liquorId,
+        },
+        { new: true }
+      );
+  
+      if (!updatedRecipe) {
+        return res.status(404).json({ error: 'Recipe not found' });
+      }
+  
+      // Update ingredients
+      const updatedIngredients = await Promise.all(
+        ingredients.map(async ({ name, quantity, unit }) => {
+          let ingredient = await Ingredient.findOne({ name });
+  
+          if (!ingredient) {
+            ingredient = new Ingredient({ name });
+            await ingredient.save();
+          }
+  
+          const existingRecipeIngredient = await RecipeIngredient.findOne({
+            recipe: recipeId,
+            ingredient: ingredient._id,
+          });
+  
+          if (existingRecipeIngredient) {
+            // Update existing ingredient
+            existingRecipeIngredient.quantity = quantity;
+            existingRecipeIngredient.unit = unit;
+            await existingRecipeIngredient.save();
+            return existingRecipeIngredient;
+          } else {
+            // Create new recipe ingredient
+            const newRecipeIngredient = new RecipeIngredient({
+              recipe: recipeId,
+              ingredient: ingredient._id,
+              quantity,
+              unit,
+            });
+            await newRecipeIngredient.save();
+            return newRecipeIngredient;
+          }
+        })
+      );
+  
+      // Remove ingredients that were deleted
+      const recipeIngredientsToDelete = await RecipeIngredient.find({
+        recipe: recipeId,
+        ingredient: { $nin: updatedIngredients.map(ing => ing.ingredient._id) },
+      });
+      await RecipeIngredient.deleteMany({ _id: { $in: recipeIngredientsToDelete.map(ing => ing._id) } });
+  
+      const addedRecipe = await Recipe.findById(recipeId)
+      .populate('user')
+      .populate('liquor')
+
+      if (addedRecipe) {
+
+        const ingredients = await RecipeIngredient.find({ recipe: addedRecipe._id }).populate('ingredient');
+      
+        var response = {
+          ...addedRecipe.toObject(),
+          ingredients: ingredients.map(({ ingredient, quantity, unit }) => ({
+            name: ingredient.name,
+            quantity,
+            unit,
+          })),
+        };
+      }
+  
+      return res.status(200).json(response);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: 'Server error' });
+    }
+};
+  
 
   export const saveRecipe = async(req,res) => {
 
