@@ -12,11 +12,11 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import TapasIcon from '@mui/icons-material/Tapas';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation} from 'react-router-dom';
 import useLogout from '../../hooks/useLogout';
 
 const pages = [
-  { name: 'Home', path: '/' },
+  { name: 'Home', path: '/home' },
   { name: 'Saved Recipes', path: '/saved-recipes' },
   { name: 'My Recipes', path: '/my-recipes' }
 ];
@@ -25,6 +25,8 @@ const settings = ['Profile', 'Logout'];
 function AuthenticatedNavbar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  const location = useLocation();
 
   const { logout } = useLogout();
 
@@ -56,7 +58,7 @@ function AuthenticatedNavbar() {
             variant="h6"
             noWrap
             component={RouterLink}
-            to="/"
+            to="/home"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -116,7 +118,7 @@ function AuthenticatedNavbar() {
             variant="h5"
             noWrap
             component={RouterLink}
-            to="/"
+            to="/home"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -137,7 +139,16 @@ function AuthenticatedNavbar() {
                 component={RouterLink}
                 to={page.path}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{
+                  my: 2,
+                  color: 'white',
+                  display: 'block',
+                  backgroundColor: location.pathname === page.path ? 'darkblue' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: 'darkblue',
+                    cursor: 'pointer',
+                  }
+                }}
               >
                 {page.name}
               </Button>

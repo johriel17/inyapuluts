@@ -1,12 +1,14 @@
 import  express  from "express"
-import { getRecipes, getRecipe, createRecipe, getMyRecipes, saveRecipe, getSavedRecipes, likeRecipe, getTopRecipes, editRecipe, deleteRecipe } from "../controllers/recipeController.js"
-import { protect, adminOnly } from '../middlewares/authMiddleware.js'
+import { getRecipes, getRecipe, createRecipe, getMyRecipes, saveRecipe, getSavedRecipes, likeRecipe, getTopRecipes, editRecipe, deleteRecipe, getSampleRecipes } from "../controllers/recipeController.js"
+import { protect } from '../middlewares/authMiddleware.js'
 const router = express.Router()
 
+//not authenticated
 
+router.get('/sample-recipes', getSampleRecipes)
+
+//authenticated
 router.use(protect)
-// router.use(adminOnly)
-
 router.get('/', getRecipes)
 
 router.get('/my-recipes', getMyRecipes)

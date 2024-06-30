@@ -147,7 +147,8 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes, onDel
             {recipe.description}
           </Typography>
         </CardContent>
-        <CardActions disableSpacing>
+        {page !== 'landing' && (
+          <CardActions disableSpacing>
           <IconButton sx={{ color: isLiked ? '#ff1744' : 'grey' }} aria-label="add to favorites" onClick={handleLikeRecipe}>
             <FavoriteIcon />
           </IconButton>
@@ -161,6 +162,8 @@ export default function RecipeDetails({ recipe, page, saved, liked, likes, onDel
             </IconButton>
           )}
         </CardActions>
+        )}
+
       </Card>
     </Box>
   );

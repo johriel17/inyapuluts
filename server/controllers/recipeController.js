@@ -6,6 +6,9 @@ import SavedRecipe from '../models/savedRecipeModel.js';
 import LikedRecipe from '../models/likedRecipeModel.js';
 import User from '../models/userModel.js'
 
+//util
+import { generateRandomIndexes } from '../utils/helper.js';
+
 export const getRecipes = async (req, res) => {
   try {
     const user = req.user;
@@ -62,6 +65,24 @@ export const getRecipes = async (req, res) => {
   }
 };
 
+export const getSampleRecipes = async (req, res) => {
+  try{
+    const count = await Recipe.countDocuments();
+
+    const randomIndexes = generateRandomIndexes(count, 2)
+
+    const recipes = await Recipe.find({})
+    .populate('user')
+    .populate('liquor')
+    .skip(randomIndexes[0])
+    .limit(1)
+
+    return res.status(200).json(recipes)
+  }catch(error){
+    console.error(error.message);
+    res.status(500).json({ error: error.message });
+  }
+}
 
 export const getMyRecipes = async (req, res) => {
   try {
@@ -420,9 +441,8 @@ export const editRecipe = async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
 };
-  
 
-  export const saveRecipe = async(req,res) => {
+export const saveRecipe = async(req,res) => {
 
     try{
 
@@ -451,9 +471,9 @@ export const editRecipe = async (req, res) => {
       res.status(500).json({ error: 'Server error'})
     }
 
-  }
+}
 
-  export const likeRecipe = async(req,res) => {
+export const likeRecipe = async(req,res) => {
 
     try{
 
@@ -484,9 +504,9 @@ export const editRecipe = async (req, res) => {
       res.status(500).json({ error: 'Server error'})
     }
 
-  }
+}
 
-  export const getTopRecipes = async (req, res) => {
+export const getTopRecipes = async (req, res) => {
     try {
       // Aggregate the most liked recipes
 
@@ -558,7 +578,7 @@ export const editRecipe = async (req, res) => {
       console.error(error);
       res.status(500).json({ message: 'Something went wrong' });
     }
-  };
+};
 
 export const deleteRecipe = async (req,res) => {
 
