@@ -40,6 +40,7 @@ const SavedRecipe = () => {
 
   useEffect(() => {
 
+    window.scrollTo({ top: 0, behavior: 'auto' });
     fetchSavedRecipes(currentPage)
 
   }, [currentPage])

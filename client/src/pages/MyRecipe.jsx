@@ -41,6 +41,7 @@ const MyRecipe = () => {
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
     fetchRecipes(currentPage);
   }, [currentPage]);
 

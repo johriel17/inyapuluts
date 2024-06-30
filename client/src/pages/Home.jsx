@@ -42,13 +42,16 @@ const Home = () => {
   useEffect(() => {
 
     fetchRecipes(currentPage)
-
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, [currentPage])
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
   
+  // useEffect(() => {
+  //   window.scrollTo({ top: 0, behavior: 'auto' });
+  // }, [currentPage]);
   
   return (
       <Container maxWidth='xl'>
