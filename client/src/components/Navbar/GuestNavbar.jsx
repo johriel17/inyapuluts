@@ -95,7 +95,7 @@ function GuestNavbar() {
             >
               {pages.map((page) => (
                 <MenuItem key={page.name} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page.name}</Typography>
+                  <Typography textAlign="center" component={RouterLink} to={page.path}>{page.name}</Typography>
                 </MenuItem>
               ))}
             </Menu>
