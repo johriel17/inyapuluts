@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import ApiClient from '../components/Api';
 
 // components
@@ -23,6 +23,7 @@ const MyRecipe = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [recipeToEdit, setRecipeToEdit] = useState(null);
+  const formRef = useRef(null);
 
   const api = ApiClient();
 
@@ -53,12 +54,17 @@ const MyRecipe = () => {
 
   const handleEditRecipe = (recipe) => {
     // setRecipeToEdit(recipe);
-    console.log(recipe.liquor.name)
     setRecipeToEdit({
       ...recipe,
       liquor : recipe.liquor.name
     })
   };
+
+  useEffect(() => {
+    if (recipeToEdit && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+  }, [recipeToEdit]);
 
   const handleFormSubmit = () => {
     setRecipeToEdit(null);
@@ -101,12 +107,12 @@ const MyRecipe = () => {
               />
             )}
           </Grid>
-          <Grid item xs={12} md={4}>
-            <RecipeForm
-              recipeToEdit={recipeToEdit}
-              onFormSubmit={handleFormSubmit}
-              onEditCancel={handleEditCancel}
-            />
+          <Grid item xs={12} md={4} ref={formRef}>
+              <RecipeForm
+                recipeToEdit={recipeToEdit}
+                onFormSubmit={handleFormSubmit}
+                onEditCancel={handleEditCancel}
+              />
           </Grid>
         </Grid>
       </Box>
