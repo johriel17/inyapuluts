@@ -12,7 +12,7 @@ export const useRegister = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.post('https://inyapuluts.onrender.com/api/users/register', { username, email, password });
+            const response = await axios.post('http://localhost:4000/api/users/register', { username, email, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data))
             dispatch({ type: 'LOGIN', payload: response.data });

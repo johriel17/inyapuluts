@@ -8,7 +8,7 @@ const ApiClient = () => {
 
   // Create Axios instance
   const api = axios.create({
-    baseURL: 'https://inyapuluts.onrender.com/api',
+    baseURL: 'http://localhost:4000/api',
   });
 
   // Add request interceptor
