@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# ignore api url temporarily, for development
+src/components/Api.jsx
+src/hooks/useLogin.jsx
+src/hooks/useRegister.jsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
